@@ -1,0 +1,4 @@
+*.pkl
+/Data
+Description/results/
+Description/logs/
