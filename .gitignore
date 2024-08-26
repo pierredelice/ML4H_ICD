@@ -2,3 +2,4 @@
 /Data
 Description/results/
 Description/logs/
+*__pycache__/

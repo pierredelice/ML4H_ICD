@@ -58,7 +58,7 @@ fqdn==1.5.1
 frozendict @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_8b0cest_id/croot/frozendict_1713194839836/work
 fsspec==2024.3.1
 gast @ file:///tmp/build/80754af9/gast_1637837472536/work
-gensim==4.3.2
+gensim==4.3.3
 gitdb==4.0.11
 GitPython==3.1.43
 google-pasta @ file:///Users/ktietz/demo/mc3/conda-bld/google-pasta_1630577991354/work
@@ -184,7 +184,7 @@ ruamel.yaml @ file:///Users/cbousseau/work/recipes/ci_py311/ruamel.yaml_16779348
 safetensors==0.4.3
 scikit-image==0.23.2
 scikit-learn==1.4.2
-scipy==1.13.0
+scipy==1.13.1
 seaborn==0.13.2
 Send2Trash==1.8.2
 sentence-transformers==2.7.0
