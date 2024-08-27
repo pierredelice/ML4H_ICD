@@ -5,3 +5,4 @@ __init__.c*
 Description/results/
 Description/logs/
 *__pycache__/
+*nohup.out

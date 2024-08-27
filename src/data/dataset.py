@@ -70,3 +70,10 @@ def collate_fn(batch, pad_idx):
     sources_padded = pad_sequence(sources, batch_first=True, padding_value=pad_idx)
     targets = torch.tensor(targets, dtype=torch.long)
     return sources_padded, targets
+
+# Step 7: Define a function to apply flatten_parameters()
+def apply_flatten(model):
+    if isinstance(model, nn.DataParallel):
+        model = model.module  # Access the underlying model if DataParallel
+    model.encoder.bigru.flatten_parameters()
+    model.decoder.gru.flatten_parameters()

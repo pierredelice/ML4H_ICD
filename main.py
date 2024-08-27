@@ -9,7 +9,7 @@ from src.data.embeddings import generate_embeddings, get_mean_embedding
 from tqdm import tqdm
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from src.data.dataset import prepare_data, MedicalDataset, DataLoader, collate_fn
+from src.data.dataset import prepare_data, MedicalDataset, DataLoader, collate_fn, apply_flatten
 from src.models.seq2seq_model import Seq2Seq
 from src.models.train import train_and_evaluate_model
 from src.models.plot_results import plot_training_and_evaluation_metrics
@@ -36,9 +36,9 @@ def main_script():
     # Run the main function from your_script.py
     # main()
     # Read data
-    path = 'Data/icd_clean.pkl'
+    path = 'Data/seedicd.pkl'
     df = read_data(path)
-    df = df[['cause','causa_icd']].sample(100_000, random_state = 123)
+    df = df[['cause','causa_icd']]#.sample(1_000, random_state = 2011)
     print(df)
     label_mapping = {value: label for label, value in enumerate(df['causa_icd'].unique())}
     df['label'] = df['causa_icd'].map(label_mapping)
@@ -49,6 +49,7 @@ def main_script():
 
     word_to_idx, label_encoder = prepare_data(list_of_tuples)
     output_size = len(label_encoder.classes_)
+    print(f"Print output_size: {output_size}")
 
     if output_size >0:
         dataset = MedicalDataset(list_of_tuples, word_to_idx, label_encoder)
@@ -60,14 +61,19 @@ def main_script():
         hidden_size = 64
 
         # Initialize the model, criterion, optimizer, and other settings
-        device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         model_a = Seq2Seq(input_size, embedding_size, output_size, hidden_size).to(device)
+	# Wrap model with DataParallel
+        #model_a = nn.DataParallel(model_a)
+        #apply_flatten(model_a)
+
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.Adam(model_a.parameters(), lr=0.01)
-        num_epochs = 10
+        num_epochs = 15
         patience = 3
         print(model_a,'\n')
         print(summary(model_a))
+        os.makedirs('results', exist_ok=True)    
         
         training_losses, training_accuracy, evaluation_accuracy, evaluation_precision, evaluation_recall, evaluation_f1 = train_and_evaluate_model(
         model_a, train_loader, test_loader, criterion, optimizer, num_epochs, patience)
@@ -76,7 +82,6 @@ def main_script():
     plot_training_and_evaluation_metrics(training_losses, training_accuracy, evaluation_accuracy, evaluation_precision, evaluation_recall, evaluation_f1)
 
     
-    os.makedirs('results', exist_ok=True)    
     # Step 8: Save the model and tokenizer
     torch.save(model_a.state_dict(), 'results/seq2seq_model.pth')
     with open('results/tokenizer.pkl', 'wb') as f:

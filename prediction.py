@@ -7,7 +7,7 @@ from torch.nn.utils.rnn import pad_sequence
 
 from src.data.preprocess_prediction import spellcheck_correction, clean_description
 
-device = torch.device('mps' if torch.backends.mps.is_available else 'cpu')
+device = torch.device('cuda' if torch.cuda.is_available else 'cpu')
 
 def load_model_and_tokenizer(model_path, tokenizer_path):
 
