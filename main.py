@@ -1,11 +1,19 @@
 # Import the necessary functions from your_script.py
+import nltk, re, unidecode, torch, pickle, os
+import torch.nn as nn 
+import torch.optim as optim
+import torch.nn.functional as F
 from modules import install_and_import, is_conda, parse_requirements, freeze_requirements, main
 from src.data.data_loader import read_data
 from src.data.embeddings import generate_embeddings, get_mean_embedding
 from tqdm import tqdm
-import nltk, re, unidecode, torch
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+from src.data.dataset import prepare_data, MedicalDataset, DataLoader, collate_fn
+from src.models.seq2seq_model import Seq2Seq
+from src.models.train import train_and_evaluate_model
+from src.models.plot_results import plot_training_and_evaluation_metrics
+from torchsummary import summary
 
 
 def main_script():
@@ -30,23 +38,53 @@ def main_script():
     # Read data
     path = 'Data/icd_clean.pkl'
     df = read_data(path)
-    df = df[['cause','causa_icd']].sample(1_000, random_state = 123)
+    df = df[['cause','causa_icd']].sample(100_000, random_state = 123)
+    print(df)
     label_mapping = {value: label for label, value in enumerate(df['causa_icd'].unique())}
     df['label'] = df['causa_icd'].map(label_mapping)
     text,label = df['cause'].values, df['label'].values
     vocabulary = set([word for item in text for word in str(item).split()])
+    list_of_tuples = list(zip(df['cause'], df['causa_icd']))
     
-    print("Run embedding function")
-    glove_path = '../economic_thesis/data/embeddings/glove/glove.6B.300d.txt'
-    fasttext_path = '../economic_thesis/data/embeddings/fasttext/cc.es.300.bin'
-    glove_embs, fasttext_embs, word2vec_embs = generate_embeddings(df, 'cause', vocabulary, glove_path, fasttext_path)
-    print("-------------------------------------------------------------")
-    glove_embedding = torch.stack([get_mean_embedding(sentence, glove_embs) for sentence in tqdm(df['cause'], desc="Computing GloVe embeddings")])
-    print("-------------------------------------------------------------")
-    word2_vec_embedding = torch.stack([get_mean_embedding(sentence, word2vec_embs) for sentence in tqdm(df['cause'], desc="Computing Word2vec embeddings")])
-    print("-------------------------------------------------------------")
-    fasttext_embedding = torch.stack([get_mean_embedding(sentence, fasttext_embs) for sentence in tqdm(df['cause'], desc="Computing FastText embeddings")])
-    print(fasttext_embedding.shape)
+
+    word_to_idx, label_encoder = prepare_data(list_of_tuples)
+    output_size = len(label_encoder.classes_)
+
+    if output_size >0:
+        dataset = MedicalDataset(list_of_tuples, word_to_idx, label_encoder)
+        train_loader = DataLoader(dataset, batch_size=16, shuffle=True, collate_fn=lambda x: collate_fn(x, word_to_idx['<PAD>']))
+        test_loader = DataLoader(dataset, batch_size=16, shuffle=False, collate_fn=lambda x: collate_fn(x, word_to_idx['<PAD>']))
+
+        input_size = len(word_to_idx)
+        embedding_size = 512
+        hidden_size = 64
+
+        # Initialize the model, criterion, optimizer, and other settings
+        device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
+        model_a = Seq2Seq(input_size, embedding_size, output_size, hidden_size).to(device)
+        criterion = nn.CrossEntropyLoss()
+        optimizer = optim.Adam(model_a.parameters(), lr=0.01)
+        num_epochs = 10
+        patience = 3
+        print(model_a,'\n')
+        print(summary(model_a))
+        
+        training_losses, training_accuracy, evaluation_accuracy, evaluation_precision, evaluation_recall, evaluation_f1 = train_and_evaluate_model(
+        model_a, train_loader, test_loader, criterion, optimizer, num_epochs, patience)
+
+    
+    plot_training_and_evaluation_metrics(training_losses, training_accuracy, evaluation_accuracy, evaluation_precision, evaluation_recall, evaluation_f1)
+
+    
+    os.makedirs('results', exist_ok=True)    
+    # Step 8: Save the model and tokenizer
+    torch.save(model_a.state_dict(), 'results/seq2seq_model.pth')
+    with open('results/tokenizer.pkl', 'wb') as f:
+        pickle.dump({'word_to_idx': word_to_idx, 'label_encoder': label_encoder}, f)
+    
+    print("--------------------------------------------------------")
+    print("Model successfully saved")
+
 
 if __name__ == "__main__":
     main_script()

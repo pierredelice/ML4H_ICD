@@ -1,3 +1,4 @@
+__init__.c*
 *.DS_Store
 *.pkl
 /Data

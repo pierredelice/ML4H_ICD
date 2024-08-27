@@ -6,11 +6,13 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from collections import Counter
 from torch.nn.utils.rnn import pad_sequence
 
-device = torch.device('cuda' if torch.cuda.is_available else 'cpu')
+device = torch.device('mps' if torch.backends.mps else 'cpu')
+
 
 # Step 4: Define Training and Evaluation Function
 def train_and_evaluate_model(model, train_loader, test_loader, 
-                             criterion, optimizer, num_epochs, patience = 3):
+                             criterion, optimizer, num_epochs, 
+                             patience = 3):
     model.train()
     
     # Lists to store metrics for each epoch
@@ -20,7 +22,7 @@ def train_and_evaluate_model(model, train_loader, test_loader,
     evaluation_precision = []
     evaluation_recall = []
     evaluation_f1 = []
-    
+    output_size = 20
 
     best_f1 = 0  # Best F1 score for early stopping
     epochs_without_improvement = 0  # Count of epochs without improvement
