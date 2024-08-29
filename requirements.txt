@@ -129,7 +129,7 @@ nbformat @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_c
 nest-asyncio @ file:///home/conda/feedstock_root/build_artifacts/nest-asyncio_1697083700168/work
 networkx==3.3
 nltk==3.8.1
-notebook==7.1.0
+notebook==7.2.2
 notebook_shim==0.2.4
 numba==0.59.1
 numpy @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_c0s16d4ba1/croot/numpy_and_numpy_base_1701295077539/work/dist/numpy-1.26.2-cp311-cp311-macosx_11_0_arm64.whl#sha256=ad57efc6771f3537d8b9fb295f7221a98cd2cb60c7380e892e2624b41c9d3d1b
