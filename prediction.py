@@ -5,9 +5,9 @@ from torch.utils.data import DataLoader
 from torch.nn.utils.rnn import pad_sequence
 
 
-from src.data.preprocess_prediction import spellcheck_correction, clean_description
+# from src.data.preprocess_prediction import spellcheck_correction, clean_description
 
-device = torch.device('mps' if torch.backends.mps.is_available else 'cpu')
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def load_model_and_tokenizer(model_path, tokenizer_path):
 
@@ -23,7 +23,7 @@ def load_model_and_tokenizer(model_path, tokenizer_path):
     hidden_size = 64
 
     model = Seq2Seq(input_size, embedding_size, output_size, hidden_size)
-    model.load_state_dict(torch.load(model_path))
+    model.load_state_dict(torch.load(model_path), map_location='cpu')
     model.to(device)
     model.eval()
         
@@ -60,9 +60,9 @@ small_data = [
 output_size = len(loaded_label_encoder.classes_)
 
 # Preprocess the small data
-preprocessed_small_data = [spellcheck_correction(clean_description(diagnosis)) for diagnosis in small_data]
+# preprocessed_small_data = [spellcheck_correction(clean_description(diagnosis)) for diagnosis in small_data]
 
-small_dataset = MedicalDataset(preprocessed_small_data, loaded_word_to_idx, loaded_label_encoder, is_prediction=True)
+small_dataset = MedicalDataset(small_data, loaded_word_to_idx, loaded_label_encoder, is_prediction=True)
 small_loader = DataLoader(small_dataset, batch_size=16, shuffle=False, 
                           collate_fn=lambda x: pad_sequence(x, batch_first=True, 
                                                             padding_value=loaded_word_to_idx['<PAD>']))
