@@ -11,7 +11,7 @@ api = Api(app, version='1.0',
            title='ICD API',
            description='API for ICD')
 
-ns = api.namespace('icd lstm', description='Clasificación ICD con LSTM')
+ns = api.namespace('icd', description='Clasificación ICD')
 
 @ns.route('/hello')
 class HelloWorld(Resource):
