@@ -4,7 +4,8 @@ from flask import Flask
 from flask_restx import Api, Resource, reqparse
 #import joblib
 # 
-
+from modelos import BiGru
+modelo = BiGru()
 
 app = Flask(__name__)
 api = Api(app, version='1.0',
@@ -13,11 +14,23 @@ api = Api(app, version='1.0',
 
 ns = api.namespace('icd', description='Clasificación ICD')
 
+parser = reqparse.RequestParser()
+parser.add_argument('texto', type = str, help = 'Texto a clasificar')
+
+@ns.route('/modelo/bigru/predict')
+class BiGru(Resource):
+    @api.doc(parser = parser)
+    def get(self):
+        text = parser.parse_args()
+
+        respuesta = f'Hola {text}'
+        return jsonify({'causa': respuesta})
+    
 @ns.route('/hello')
 class HelloWorld(Resource):
     def get(self):
 
-        return {'hello': 'API para la codificación de un texto libre en clave ICD'}
+        return {'hello': 'Hola Mundo de api'}
 
 
 if __name__ == '__main__':
