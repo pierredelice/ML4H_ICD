@@ -48,13 +48,13 @@ def load_model_and_tokenizer(model_path, tokenizer_path):
 
 class BiGru(object):
 
-    def __init__(self):
+    def __init__(self, model_path, tokenizer_path):
         self.loaded_model, self.loaded_word_to_idx, self.loaded_label_encoder = load_model_and_tokenizer(
-            './seq2seq_model.pth', 
-            './tokenizer.pkl')
+            f'{model_path}/seq2seq_model.pth', 
+            f'{tokenizer_path}/tokenizer.pkl')
         self.output_size = len(self.loaded_label_encoder.classes_)
 
-    def predict(self, small_data): 
+    def predict_batch(self, small_data): 
         loaded_model = self.loaded_model
         loaded_word_to_idx = self.loaded_word_to_idx
         loaded_label_encoder = self.loaded_label_encoder
@@ -64,9 +64,9 @@ class BiGru(object):
         small_loader  = DataLoader(small_dataset, batch_size=16, shuffle=False, 
                                    collate_fn=lambda x: pad_sequence(x, batch_first=True, 
                                                                      padding_value=loaded_word_to_idx['<PAD>']))
-
-        for src in small_loader:
-            src = src.to(device)       
+        # print(small_loader.dataset)
+        for inx in small_loader:
+            src = inx.to(device)       
             trg_onehot = torch.zeros((src.size(0), 1, output_size)).to(device)  # Initialize target with zeros
             
     
@@ -74,9 +74,17 @@ class BiGru(object):
             _, predicted = torch.max(outputs, dim=-1)
             predicted_labels = [loaded_label_encoder.inverse_transform([pred.item()])[0] for pred in predicted.flatten()]
             return predicted_labels
+    
+    def predict_single(self, cause): 
+        loaded_model = self.loaded_model
+        loaded_word_to_idx = self.loaded_word_to_idx
+        loaded_label_encoder = self.loaded_label_encoder
+        output_size = self.output_size
+
+        
 
 
 if __name__=='__main__':
     bigru = BiGru()
     small_data = input("Dame el diagnóstico: ")
-    print(bigru.predict(small_data=small_data))
+    print(bigru.predict_batch(small_data=small_data))

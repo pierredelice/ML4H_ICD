@@ -5,7 +5,7 @@ from flask_restx import Api, Resource, reqparse
 #import joblib
 # 
 from modelos import BiGru
-modelo = BiGru()
+modelo = BiGru('.','.')
 
 app = Flask(__name__)
 api = Api(app, version='1.0',
@@ -22,9 +22,9 @@ class BiGru(Resource):
     @api.doc(parser = parser)
     def get(self):
         text = parser.parse_args()
-
-        respuesta = f'Hola {text}'
-        return jsonify({'causa': respuesta})
+        prediccion = modelo.predict_batch(text['texto'])
+        return jsonify({'causa': prediccion, 
+                        'texto' : text['texto']})
     
 @ns.route('/hello')
 class HelloWorld(Resource):
