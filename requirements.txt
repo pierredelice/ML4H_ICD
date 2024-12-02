@@ -128,7 +128,7 @@ nbconvert==7.16.2
 nbformat @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_cbnf5nccgk/croot/nbformat_1694616744196/work
 nest-asyncio @ file:///home/conda/feedstock_root/build_artifacts/nest-asyncio_1697083700168/work
 networkx==3.3
-nltk==3.8.1
+nltk==3.9
 notebook==7.1.0
 notebook_shim==0.2.4
 numba==0.59.1
