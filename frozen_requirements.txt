@@ -183,7 +183,7 @@ rpds-py @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_f8
 ruamel.yaml @ file:///Users/cbousseau/work/recipes/ci_py311/ruamel.yaml_1677934845850/work
 safetensors==0.4.3
 scikit-image==0.23.2
-scikit-learn==1.4.2
+scikit-learn==1.5.0
 scipy==1.13.0
 seaborn==0.13.2
 Send2Trash==1.8.2
